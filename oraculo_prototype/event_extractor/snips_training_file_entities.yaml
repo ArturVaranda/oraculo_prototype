@@ -1,0 +1,312 @@
+# action Entity
+---
+type: entity
+name: action_word
+automatically_extensible: true # default value is true
+use_synonyms: true # default value is true
+matching_strictness: 1.0 # default value is 1.0
+values:
+  - arrest
+  - fighting
+  - battle
+  - air raid
+  - explosion
+  - protest
+  - demonstration
+  - threat
+  - patrol
+  - combat
+  - bomb
+  - violence
+  - mutiny
+  - military operation
+  - strike
+  - rocket
+  - grenade
+  - suicide bomber
+  - abducted
+  - ambush
+  - ambushed
+  - arrested
+  - assaulted
+  - attack
+  - attacked
+  - beaten
+  - blocked
+  - captured
+  - clashed
+  - conquered
+  - counterattacked
+  - defended
+  - demobilized
+  - destroyed
+  - detonated
+  - disarmed
+  - escaped
+  - escorted
+  - exchanged fire
+  - exploded
+  - extorted
+  - fired
+  - guarded
+  - infiltrated
+  - kidnapped
+  - killed
+  - located
+  - looted
+  - lynched
+  - marched
+  - neutralized
+  - occupied
+  - protected
+  - raped
+  - released
+  - retreated
+  - robbed
+  - secured
+  - seized
+  - shot
+  - sieged
+  - surrendered
+  - threatened
+  - tortured
+  - withdrew
+
+---
+# faction Entity
+
+type: entity
+name: faction_word
+automatically_extensible: true # default value is true
+use_synonyms: true # default value is true
+matching_strictness: 1.0 # default value is 1.0
+values:
+  - MINUSCA 
+  - Minusca 
+  - Peacekeepers 
+  - Blue Helmets 
+  - UN troops 
+  - UN forces 
+  - UN soldiers 
+  - Portuguese soldiers 
+  - Portuguese troops 
+  - Rwandan troops 
+  - Rwandan forces 
+  - UN 
+  - Portuguese 
+  - Rwandan 
+  - Sri Lankan
+  - Burundian
+  - Government forces
+  - FACA
+  - Military
+  - Police 
+  - Gendarmes 
+  - central african soldiers 
+  - Central African Armed Forces 
+  - presidential guard 
+  - gendarmerie
+  - French army 
+  - french military 
+  - french soldiers 
+  - French
+  - LRA Kony 
+  - Joseph Kony 
+  - Lords Resistance Army 
+  - Konys LRA                       
+  - Anti Balaka 
+  - Anti-balaka 
+  - antibalaka                          
+  - Seleka 
+  - ex Seleka 
+  - "ex-Seleka"                        
+  - UPC 
+  - Ali Darass 
+  - Ali Darassa 
+  - Unity for peace in the Central African Republic                    
+  - FPRC 
+  - Popular Front for the Renaissance of the Central African Republic 
+  - Noureddine Adam                       
+  - MNLC 
+  - National Movement for the Liberation of the Central African Republic 
+  - Ahmat Bahar                      
+  - MPC 
+  - Central African Patriotic Movement
+  - RRR 
+  - 3R 
+  - Return Reclamation Rehabilitation 
+  - Sidiki Abbas 
+  - Abbas Sidiki 
+  - 3Rs                 
+  - MLCJ 
+  - Movement of Central African Liberators for Justice      
+  - RPRC 
+  - Patriotic rally for the renewal of the Central African Republic                        
+  - civilians 
+  - protesters 
+  - demonstrators 
+  - crowd 
+  - mob
+  - farmers                     
+  - herders 
+  - breeders                         
+  - unidentified armed groups 
+  - armed groups 
+  - armed men 
+  - militia 
+  - rebels 
+  - unidentified armed men 
+  - unknown armed men 
+  - armed gangs 
+  - gangs 
+  - robbers 
+  - "self-defence groups"
+  - EUTM 
+  - European Union 
+  - EU 
+  - European Union Training Mission                  
+  - Jihadists                           
+  - Fulani 
+  - Peul                          
+  - Goula                   
+  - NGO 
+  - humanitarian workers 
+  - humanitarian aid workers 
+  - red cross 
+  - Medecins sans frontieres 
+  - IRC             
+  - Wagner 
+  - mercenaries 
+  - Russian mercenaries 
+  - Wagner group                     
+  - IDP 
+  - refugees 
+  - displaced persons 
+  - IDP 
+  - camp 
+
+---
+# effects Entity
+
+type: entity
+name: effect_word
+automatically_extensible: true # default value is true
+use_synonyms: true # default value is true
+matching_strictness: 1.0 # default value is 1.0
+values:
+  - dead 
+  - death
+  - wounded     
+  - burned 
+  - devastated 
+  - tension 
+  - panic 
+  - psychosis
+  - five dead
+
+---
+# location Entity
+
+type: entity
+name: location_word
+automatically_extensible: true # default value is true
+use_synonyms: true # default value is true
+matching_strictness: 0.9 # default value is 1.0
+values:
+  - Abba  
+  - Alindao
+  - "Amada-Gaza"
+  - Baboua 
+  - Bakala  
+  - Bakouma 
+  - Bambari 
+  - Bambio  
+  - Bambouti  
+  - Bamingui  
+  - Bamingui Bangoran 
+  - Bangassou 
+  - Bangui  
+  - Baoro 
+  - Basse Kotto 
+  - Batangafo 
+  - Bayanga 
+  - Berberati 
+  - Bimbo 
+  - Birao 
+  - Boali 
+  - Bocaranga 
+  - Boda  
+  - Boganangone 
+  - Boganda 
+  - Bogangolo 
+  - Boguila 
+  - Bossangoa 
+  - Bossembele  
+  - Bossemptele 
+  - Bossemtele
+  - Bouar
+  - Bouca 
+  - Bozoum  
+  - Bria  
+  - Carnot  
+  - Damara  
+  - Dede Mokouba  
+  - Dekoa 
+  - Djema 
+  - Djoukou 
+  - Djoko 
+  - Ndjoukou 
+  - Gadzi 
+  - Gambo 
+  - Gamboula  
+  - Grimari 
+  - Haut Mbomou 
+  - Haute Kotto 
+  - Ippy  
+  - Kabo  
+  - KagaBandoro  
+  - Kembe 
+  - Kemo  
+  - Kouango 
+  - Koui  
+  - Lobaye  
+  - Mambere Kadei 
+  - Markounda 
+  - Mba ki Mbaki
+  - Mbomou  
+  - Mbres 
+  - MbrÞs
+  - Mingala 
+  - Mobaye  
+  - Mongoumba Moungoumba
+  - Nana Gribizi  
+  - Nana Mambere  
+  - Nana Bakassa 
+  - "Nana-Bakassa"
+  - Nangha Boguila 
+  - Nanga Boguila
+  - Ndele 
+  - Ngaounday 
+  - Ngaoundaye
+  - Nola  
+  - Obo 
+  - Ombella M'Poko 
+  - Ombella Mpoko 
+  - Ombella M Poko
+  - Ouadda  
+  - Ouaka 
+  - Ouanda-Djalle 
+  - Ouanda Djalle
+  - Ouango  
+  - Ouham 
+  - Ouham Pende 
+  - Paoua 
+  - Rafai 
+  - Rafa
+  - Sibut 
+  - Sosso-Nakombo 
+  - Sosso Nakombo 
+  - Vakaga  
+  - Yalinga 
+  - Yaloke
+  - Zemio 

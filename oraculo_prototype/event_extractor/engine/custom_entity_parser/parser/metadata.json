@@ -1,0 +1,20 @@
+{
+  "parsers_metadata": [
+    {
+      "entity_identifier": "action_word",
+      "entity_parser": "parser_1"
+    },
+    {
+      "entity_identifier": "effect_word",
+      "entity_parser": "parser_2"
+    },
+    {
+      "entity_identifier": "faction_word",
+      "entity_parser": "parser_3"
+    },
+    {
+      "entity_identifier": "location_word",
+      "entity_parser": "parser_4"
+    }
+  ]
+}
