@@ -4,14 +4,10 @@ Created on Fri Mar 12 14:38:06 2021
 
 @author: artur
 """
-import pandas as pd
-import re
 import time
 import os
-import shutil
 
 #from textblob import TextBlob
-from deep_translator import GoogleTranslator
 from Scweet.scweet import scrape
 
 test_account_list = ["@RFIAAfrique","@CorbeauNews","@AFPAfrica","RadioNdekeLuka","@RJDH_RCA","@AP_Africa"]
@@ -47,21 +43,7 @@ def tweet_scraper_wrapper(account, start_date=None, end_date=time.strftime("%Y-%
     
     return raw_df
 
-def raw_translator(text, remove_symbols=True):
-    
-    content = re.sub("(\n)"," ", text)
-    
-    if remove_symbols == True:
-        content = re.sub(r"([\"#@])","",text)
-    
-    try:
-        #content = str(TextBlob(content).translate(from_lang="fr", to='en'))
-        content = GoogleTranslator(source='auto', target='en').translate(text=text)
-        
-    except:
-        content = text
-            
-    return content
 
-    
+
+        
 

@@ -11,7 +11,7 @@ def event_merger(geocoded_event_df, date_window=2, event_id_start=0):
     # 0) start id / convert to datetime
     event_id = event_id_start
     geocoded_event_df["pred_date"] = geocoded_event_df["pred_date"].apply(lambda date : 
-                                                                          pd.to_datetime(date).date())
+                                                                          pd.to_datetime(date, unit="s").date())
     
     # 1) First pass: create subset of most informative tweets
     geocoded_event_df["event_code"]=""

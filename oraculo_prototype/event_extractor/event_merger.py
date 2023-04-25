@@ -33,7 +33,7 @@ def event_aggregator(integrated_event_df, date_window=1):
          #"format",
          #"id",
          #"URL"
-         ].agg(lambda text : list(text))
+         ].agg(lambda text : list(text)).reset_index(drop=True)
     
     agg_event_df = merger_utils.loc_ev_selector(agg_event_df)
     agg_event_df["pred_date"] = agg_event_df["pred_date"].apply(merger_utils.date_ev_selector)

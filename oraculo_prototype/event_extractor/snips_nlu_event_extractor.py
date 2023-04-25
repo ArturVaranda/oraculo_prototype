@@ -15,8 +15,10 @@ import os
 import io
 import json
 import time
+import signal
 
 from oraculo_prototype.event_extractor import tweet_utils
+from oraculo_prototype.utils import gp_tools
 
 from shutil import copyfile
 from sklearn.utils import resample
@@ -87,7 +89,8 @@ def training_file_creator(train_df, oversampling=False, ratio=1):
 
 #start conditions: clean raw_df, index from train_test_splitter
 def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
-                              threshold = 0.85, raw_df_content_name="en_content"):
+                              threshold = 0.85, raw_df_content_name="en_content", \
+                              raw_df_date_name = "Timestamp"):
     
     with io.open(os.path.join(dir_path,"snips_train.json")) as f:
             training_dataset = json.load(f)
@@ -111,11 +114,11 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
     test_step = 0
     
     #preprocess raw_df
-    raw_df['en_content'] = raw_df['en_content'].apply(tweet_utils.tweet_cleaner, args=(False,False,True))    
+    raw_df[raw_df_content_name] = raw_df[raw_df_content_name].apply(tweet_utils.tweet_cleaner, args=(False,False,True))    
 
     for i in raw_df.index:
         test_step += 1
-        print("Classifying tweet {} of {} at {}".format(test_step,len(raw_df.index),time.strftime("%H:%M:%S")))
+        print("Classifying content {} of {} at {}".format(test_step,len(raw_df.index),time.strftime("%H:%M:%S")))
         event_args = {
                        'action':[],
                        'agent':[],
@@ -127,6 +130,10 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
 
         tweet = raw_df[raw_df_content_name].loc[i]
         
+        signal.signal(signal.SIGALRM, gp_tools.handle_timeout)
+        signal.alarm(600)  # 10*60 seconds = 10 minutes
+
+        #TODO: Try for time
         try:
             intents = nlu_engine.get_intents(str(tweet))
             
@@ -151,6 +158,9 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
                         y_pred.append(0)
                         loc_y_pred = 0
             
+            signal.signal(signal.SIGALRM, gp_tools.handle_timeout)
+            signal.alarm(600)  # 10*60 seconds = 10 minutes
+            
             try:
                 print("Starting argument extraction at {}".format(time.strftime("%H:%M:%S")))
                 slots = nlu_engine.get_slots(str(tweet),'event')
@@ -167,8 +177,9 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
                             except:
                                 event_args[arg].append("")
             
-                event_args['date']=raw_df["Timestamp"].loc[i] #"Timestamp" is format-dependent!
+                event_args['date']=raw_df[raw_df_date_name].loc[i] #"Timestamp" is format-dependent!
                 print("Argument extraction was successful")
+                signal.alarm(0) # reset alarm
                 
         #if not event_args['date']:
             #event_args['date'].append(test_df.date.loc[i])
