@@ -15,15 +15,17 @@ import os
 import io
 import json
 import time
-import signal
 
 from oraculo_prototype.event_extractor import tweet_utils
+from oraculo_prototype.event_extractor import snips_extractor_utils
 from oraculo_prototype.utils import gp_tools
 
 from shutil import copyfile
 from sklearn.utils import resample
 from snips_nlu import SnipsNLUEngine
 from snips_nlu.default_configs import CONFIG_EN
+
+import concurrent.futures as futuresmod
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -115,8 +117,9 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
     
     #preprocess raw_df
     raw_df[raw_df_content_name] = raw_df[raw_df_content_name].apply(tweet_utils.tweet_cleaner, args=(False,False,True))    
-
+    
     for i in raw_df.index:
+        
         test_step += 1
         print("Classifying content {} of {} at {}".format(test_step,len(raw_df.index),time.strftime("%H:%M:%S")))
         event_args = {
@@ -130,9 +133,6 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
 
         tweet = raw_df[raw_df_content_name].loc[i]
         
-        signal.signal(signal.SIGALRM, gp_tools.handle_timeout)
-        signal.alarm(600)  # 10*60 seconds = 10 minutes
-
         #TODO: Try for time
         try:
             intents = nlu_engine.get_intents(str(tweet))
@@ -157,10 +157,7 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
                     else:
                         y_pred.append(0)
                         loc_y_pred = 0
-            
-            signal.signal(signal.SIGALRM, gp_tools.handle_timeout)
-            signal.alarm(600)  # 10*60 seconds = 10 minutes
-            
+                       
             try:
                 print("Starting argument extraction at {}".format(time.strftime("%H:%M:%S")))
                 slots = nlu_engine.get_slots(str(tweet),'event')
@@ -179,14 +176,13 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
             
                 event_args['date']=raw_df[raw_df_date_name].loc[i] #"Timestamp" is format-dependent!
                 print("Argument extraction was successful")
-                signal.alarm(0) # reset alarm
                 
         #if not event_args['date']:
             #event_args['date'].append(test_df.date.loc[i])
 
         tweet_args = [loc_y_pred,rel_prob,event_args['action'],event_args['agent'],event_args['target'],
                          event_args['date'],event_args['location'],event_args['effect']]
-
+        
         args_pred.append(tweet_args)
     
     pred_args_df = pd.DataFrame(args_pred, columns=['y_pred','pred_relev_prob','pred_action','pred_agent','pred_target',
@@ -197,5 +193,130 @@ def snips_nlu_event_extractor(training_file, raw_df, use_new_engine = False, \
     
     return extracted_event_df
 
-
+def snips_nlu_event_extractor_timeout(training_file, raw_df, use_new_engine = False, \
+                              threshold = 0.85, raw_df_content_name="en_content", \
+                              raw_df_date_name = "Timestamp", timelimit=360):
     
+    with io.open(os.path.join(dir_path,"snips_train.json")) as f:
+            training_dataset = json.load(f)
+    
+    if use_new_engine == False:
+        try:
+            print("Retrieving trained engine...")
+            nlu_engine = SnipsNLUEngine.from_path(os.path.join(dir_path,"engine"))
+            print("...done.")
+        except:
+            print("Failed engine retrieval. Training new engine...")
+            nlu_engine = new_engine(training_dataset)
+            print("...training done")
+    else:
+        print("Training new engine...")
+        nlu_engine = new_engine(training_dataset)
+        print("...training done")
+    
+    #timelimit is dummy variable as of 28 IV 2023
+    print("Timeout of {} seconds enabled".format(timelimit))
+    
+    y_pred = []
+    args_pred = []
+    test_step = 1
+    
+    #preprocess raw_df
+    raw_df[raw_df_content_name] = raw_df[raw_df_content_name].apply(tweet_utils.tweet_cleaner, args=(False,False,True))    
+    
+    for i in raw_df.index:
+        
+        print("Classifying content {} of {} at {}".format(test_step,len(raw_df.index),time.strftime("%H:%M:%S")))
+        
+        try:
+            local_output = snips_extractor_utils.element_extractor(nlu_engine,
+                                                                   raw_df,
+                                                                   i,
+                                                                   test_step,
+                                                                   y_pred,
+                                                                   threshold=threshold,
+                                                                   raw_df_content_name=raw_df_content_name,
+                                                                   raw_df_date_name=raw_df_date_name
+                                                                   )
+        
+            args_pred.append(local_output[0])
+            #test_step = local_output[1]
+            y_pred = local_output[2]
+            print("Classification and extraction successful. Trying next tweet.")
+            
+        except Exception as error:
+            print(error)
+            y_pred.append(0)
+            #test_step += 1
+            args_pred.append([0,0,"no_action","no_agent","no_target","no_date","no_location","no_effect"])
+            continue
+        
+        test_step += 1    
+        
+    pred_args_df = pd.DataFrame(args_pred, columns=['y_pred','pred_relev_prob','pred_action','pred_agent','pred_target',
+                                                'pred_date','pred_location','pred_effects'],
+                           index = raw_df.index)
+
+    extracted_event_df = pd.merge(raw_df, pred_args_df, how='inner',left_index=True, right_index=True)
+    
+    return extracted_event_df
+
+def snips_nlu_event_extractor_multi(training_file, raw_df, use_new_engine = False, \
+                              threshold = 0.85, raw_df_content_name="en_content", \
+                              raw_df_date_name = "Timestamp", timelimit=180, worker_size=10):
+    
+    with io.open(os.path.join(dir_path,"snips_train.json")) as f:
+            training_dataset = json.load(f)
+    
+    if use_new_engine == False:
+        try:
+            print("Retrieving trained engine...")
+            nlu_engine = SnipsNLUEngine.from_path(os.path.join(dir_path,"engine"))
+            print("...done.")
+        except:
+            print("Failed engine retrieval. Training new engine...")
+            nlu_engine = new_engine(training_dataset)
+            print("...training done")
+    else:
+        print("Training new engine...")
+        nlu_engine = new_engine(training_dataset)
+        print("...training done")
+    
+    #timelimit is dummy variable as of 28 IV 2023
+    print("Timeout of {} seconds enabled".format(timelimit))
+    
+    y_pred = []
+    args_pred = []
+    test_step = 1
+    
+    #preprocess raw_df
+    raw_df[raw_df_content_name] = raw_df[raw_df_content_name].apply(tweet_utils.tweet_cleaner, args=(False,False,True))    
+    
+    with futuresmod.ThreadPoolExecutor(max_workers=worker_size) as executor:
+        # submit tasks and collect futures
+        futures = [executor.submit(snips_extractor_utils.element_extractor, nlu_engine, \
+                                   raw_df, i, test_step, y_pred, threshold=threshold, \
+                                   raw_df_content_name=raw_df_content_name, \
+                                   raw_df_date_name=raw_df_date_name) for i in raw_df.index]
+        # process task results as they are available
+        for future in futuresmod.as_completed(futures):
+            # retrieve the result
+            try:
+                local_output = future.result()
+            except Exception as error:
+                print(error)
+                y_pred.append(0)
+                args_pred.append([0,0,"no_action","no_agent","no_target","no_date","no_location","no_effect"])
+            else:
+                args_pred.append(local_output[0])
+                y_pred = local_output[2]
+                print("Classification and extraction successful. Trying next element.")
+    
+                
+    pred_args_df = pd.DataFrame(args_pred, columns=['source','timestamp','url','en_content','y_pred','pred_relev_prob','pred_action','pred_agent','pred_target',
+                                                'pred_date','pred_location','pred_effects'],
+                           index = raw_df.index)
+
+    #extracted_event_df = pd.merge(raw_df, pred_args_df, how='inner',left_index=True, right_index=True)
+    
+    return pred_args_df

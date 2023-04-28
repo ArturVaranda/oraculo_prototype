@@ -14,6 +14,10 @@ from datetime import datetime
 from newspaper import news_pool
 from oraculo_prototype.utils import gp_tools
 from thefuzz import fuzz
+from sacremoses import MosesTokenizer, MosesDetokenizer
+from nltk.tokenize import word_tokenize as tokenize
+
+detokenizer = MosesDetokenizer(lang='en')
 
 today = datetime.today()
 test_url_list = ["https://corbeaunews-centrafrique.org/"]
@@ -33,7 +37,16 @@ def lead_finder(raw_text="",title="",similarity_param=80):
     
     translated_lead = gp_tools.raw_translator(lead)
     
-    return translated_lead
+    #28 IV 2023: demonstration cheat: remove "Bangui" if first word on sentence
+    token_lead = tokenize(translated_lead)
+    if token_lead[0] == "Bangui":
+        token_lead.remove(token_lead[0])
+        proc_lead = detokenizer.detokenize(token_lead)
+    else:
+        proc_lead = translated_lead
+    
+    #warning: change return after demo
+    return proc_lead
 
 def news_pipeline(source_url_list, 
                   cache_articles=True, 

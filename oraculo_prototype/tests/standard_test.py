@@ -71,8 +71,10 @@ def live_twitter_1account_test(test_id, account="@CorbeauNews",
 
 def live_news_1source_test(test_id, 
                            test_size = 5,
-                           source_url_list=["https://corbeaunews-centrafrique.org/"]
-                          ):
+                           extraction_limit = True,
+                           source_url_list=["https://corbeaunews-centrafrique.org/"],
+                           timeout = True                           
+                           ):
     
 
     training_excel = os.path.join(os.path.dirname(os.getcwd()), "event_extractor", "tweet_dataset_train_2.xlsx")
@@ -82,13 +84,20 @@ def live_news_1source_test(test_id,
                                           cache_articles=False,
                                           store_output=True,
                                           lead_similarity_param=80,
-                                          extraction_limit=True,
+                                          extraction_limit=extraction_limit,
                                           article_limit=test_size
                                           )
-    
-    input_df2 = input_df.head(test_size)
-    
-    output_df = snips_nlu_event_extractor.snips_nlu_event_extractor(training_df, input_df2, use_new_engine=False,
+    if extraction_limit == True:   
+        input_df = input_df.head(test_size)
+    else:
+        pass
+        
+    #warning: trying timeout
+    if timeout == True:
+        output_df = snips_nlu_event_extractor.snips_nlu_event_extractor_multi(training_df, input_df, use_new_engine=False,
+                                                                    threshold=0.987, worker_size=10)
+    else:
+        output_df = snips_nlu_event_extractor.snips_nlu_event_extractor(training_df, input_df, use_new_engine=False,
                                                                     threshold=0.987)
     
     output_df.to_excel("test_{}_snips_output.xlsx".format(test_id), sheet_name="score", )

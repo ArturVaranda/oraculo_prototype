@@ -5,8 +5,8 @@ Created on Tue Apr 25 15:15:34 2023
 @author: artur
 """
 import re
-import time
-import signal
+import threading
+import multiprocessing
 
 from deep_translator import GoogleTranslator
 
@@ -25,6 +25,6 @@ def raw_translator(text, remove_symbols=True):
             
     return content
 
-
-def handle_timeout(signum, frame):
-    raise Exception("action exceeded time limit")
+def thread_viewer():
+    multiprocessing.current_process()
+    return threading.enumerate()
